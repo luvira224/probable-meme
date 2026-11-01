@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#f5f5f2">
+<title>Color Allocation Tracker</title>
+<style>
+:root{--bg:#f5f5f2;--surface:#fff;--ink:#202321;--muted:#707771;--line:#e4e7e2;--accent:#273b32;--soft:#eef1ed;--radius:18px}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+button,input,select{font:inherit}button{cursor:pointer}.wrap{max-width:1180px;margin:auto;padding:32px 22px 64px}
+header{display:flex;justify-content:space-between;align-items:flex-start;gap:18px;margin-bottom:26px}h1{font-size:clamp(27px,4vw,38px);letter-spacing:-1.2px;line-height:1.1;margin:0 0 8px}h2{font-size:18px;letter-spacing:-.3px;margin:0 0 5px}h3{font-size:14px;margin:0 0 12px}.sub,.muted{color:var(--muted)}.sub{margin:0;max-width:620px}.actions{display:flex;gap:8px;flex-wrap:wrap}
+.btn{border:1px solid var(--line);background:#fff;color:var(--ink);padding:10px 14px;border-radius:11px;font-weight:650;font-size:13px}.btn.primary{background:var(--accent);color:white;border-color:var(--accent)}.btn.danger{color:#a23b35}.btn.small{padding:6px 9px;font-size:12px}
+.grid{display:grid;grid-template-columns:1.08fr .92fr;gap:18px;margin-bottom:18px}.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:21px;min-width:0}.card.full{grid-column:1/-1}.section-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:18px}.eyebrow{text-transform:uppercase;letter-spacing:1.1px;font-size:10px;font-weight:750;color:var(--muted);margin-bottom:6px}.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:18px}.stat{background:var(--soft);border-radius:13px;padding:13px}.stat strong{display:block;font-size:24px;letter-spacing:-.7px}.stat span{font-size:11px;color:var(--muted)}
+.form-row{display:grid;grid-template-columns:minmax(0,1fr) 150px auto;gap:8px}.field{width:100%;border:1px solid var(--line);background:#fff;border-radius:10px;padding:11px 12px;color:var(--ink);min-width:0}.field:focus{outline:2px solid #9eb3a5;outline-offset:1px}.help{font-size:12px;color:var(--muted);margin:9px 0 0}
+.item-list{margin-top:17px;border-top:1px solid var(--line)}.item{display:grid;grid-template-columns:minmax(0,1fr) 115px 32px;gap:10px;align-items:center;padding:11px 0;border-bottom:1px solid #eff0ed}.item-name{overflow-wrap:anywhere}.color-tag{display:flex;align-items:center;gap:7px;color:#555e58;font-size:12px}.swatch{width:12px;height:12px;border-radius:4px;display:inline-block;border:1px solid #0000001c;flex:0 0 auto}.empty{padding:25px 8px;text-align:center;color:var(--muted);font-size:13px}
+.chart-layout{display:grid;grid-template-columns:180px minmax(0,1fr);gap:20px;align-items:center}.pie{width:174px;height:174px;border-radius:50%;background:conic-gradient(#ddd 0 100%);position:relative;margin:auto}.pie:after{content:"";position:absolute;inset:39px;background:white;border-radius:50%}.pie-center{position:absolute;inset:0;display:grid;place-content:center;text-align:center;z-index:1}.pie-center strong{font-size:26px;line-height:1.1}.pie-center span{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.8px}
+.legend{display:grid;gap:8px}.legend-row{display:grid;grid-template-columns:minmax(0,1fr) 48px 48px;gap:8px;align-items:center;font-size:12px}.legend-name{display:flex;align-items:center;gap:7px;min-width:0}.legend-name span:last-child{overflow-wrap:anywhere}.legend-row .num,.legend-row .pct{text-align:right;font-variant-numeric:tabular-nums;color:#5f6861}.legend-head{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.7px}
+.group-label{display:flex;justify-content:space-between;align-items:center;margin:16px 0 9px;font-size:12px;font-weight:750}.group-label:first-child{margin-top:0}.group-label span:last-child{color:var(--muted);font-weight:550}
+.table-wrap{overflow-x:auto}table{width:100%;border-collapse:collapse;font-size:13px}th{text-align:left;color:var(--muted);font-size:10px;text-transform:uppercase;letter-spacing:.7px;font-weight:700;padding:9px 8px;border-bottom:1px solid var(--line)}td{padding:10px 8px;border-bottom:1px solid #eff0ed}td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}.recommend-total{display:grid;grid-template-columns:repeat(4,1fr);gap:9px;margin-bottom:15px}.mini-stat{padding:12px;background:var(--soft);border-radius:12px}.mini-stat strong{display:block;font-size:20px}.mini-stat span{font-size:11px;color:var(--muted)}.note{padding:12px 14px;background:#f7f8f5;border:1px solid var(--line);border-radius:12px;color:#626b64;font-size:12px;margin-top:13px}
+.pill{font-size:10px;font-weight:750;border-radius:99px;padding:4px 8px;background:#edf1ed;color:#526156}.tools-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px}.upload-box{border:1px dashed #cbd2ca;border-radius:13px;padding:16px;background:#fafbf9}.upload-box input{max-width:100%;font-size:12px}.image-stage{margin-top:12px;display:none;max-height:320px;overflow:auto;border-radius:10px;background:#f0f1ee}.image-stage canvas{display:block;max-width:100%;height:auto;cursor:crosshair}.sample-result{display:flex;align-items:center;gap:12px;margin-top:12px}.sample-chip{width:40px;height:40px;border-radius:10px;border:1px solid #0002}.sample-result strong{display:block}.sample-result small{color:var(--muted)}.dropper-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+hr{border:0;border-top:1px solid var(--line);margin:18px 0}.footer{text-align:center;color:var(--muted);font-size:11px;margin-top:20px}
+@media(max-width:800px){.grid{grid-template-columns:1fr}.card.full{grid-column:auto}.tools-grid{grid-template-columns:1fr}.chart-layout{grid-template-columns:145px minmax(0,1fr);gap:12px}.pie{width:140px;height:140px}.pie:after{inset:32px}.recommend-total{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:520px){.wrap{padding:23px 13px 42px}header{display:block}.actions{margin-top:16px}.card{padding:16px}.form-row{grid-template-columns:1fr 1fr}.form-row .field:first-child{grid-column:1/-1}.form-row button{grid-column:1/-1}.stats{gap:7px}.stat{padding:10px}.stat strong{font-size:21px}.chart-layout{grid-template-columns:1fr}.pie{margin:0 auto 10px}.legend-row{grid-template-columns:minmax(0,1fr) 38px 43px}.item{grid-template-columns:minmax(0,1fr) 90px 28px;gap:6px}.item-name{font-size:13px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+ <div><div class="eyebrow">Collection planning</div><h1>Color Allocation Tracker</h1><p class="sub">Track what you own, compare it with your fixed 80/20 color balance, and see the smallest practical path toward the target.</p></div>
+ <div class="actions"><button class="btn" id="exportBtn">Export JSON</button><button class="btn" id="importBtn">Import JSON</button><input id="importFile" type="file" accept=".json,application/json" hidden></div>
+</header>
+<div class="grid">
+<section class="card">
+ <div class="section-head"><div><div class="eyebrow">Collection</div><h2>Add an item</h2><div class="muted" style="font-size:12px">Give each entry a name and one palette color.</div></div><span class="pill" id="savedState">Auto-saved</span></div>
+ <form id="itemForm"><div class="form-row"><input class="field" id="itemName" maxlength="180" placeholder="Item description or name" required><select class="field" id="itemColor" aria-label="Item color"></select><button class="btn primary" type="submit">Add item</button></div></form>
+ <p class="help">Your collection is saved in this browser automatically.</p>
+ <div class="item-list" id="itemList"></div>
+ <div style="display:flex;justify-content:flex-end;margin-top:12px"><button class="btn danger small" id="clearBtn" type="button">Clear all entries</button></div>
+</section>
+<section class="card">
+ <div class="section-head"><div><div class="eyebrow">Current state</div><h2>Actual distribution</h2><div class="muted" style="font-size:12px">Your collection right now.</div></div></div>
+ <div class="stats"><div class="stat"><strong id="totalItems">0</strong><span>Total items</span></div><div class="stat"><strong id="majorityActual">0%</strong><span>Majority colors</span></div><div class="stat"><strong id="minorityActual">0%</strong><span>Minority colors</span></div></div>
+ <div class="chart-layout"><div class="pie" id="actualPie"><div class="pie-center"><strong id="actualCenter">0</strong><span>items</span></div></div><div class="legend" id="actualLegend"></div></div>
+</section>
+<section class="card">
+ <div class="section-head"><div><div class="eyebrow">Reference</div><h2>Ideal allocation</h2><div class="muted" style="font-size:12px">Fixed targets — the ratio cannot be edited.</div></div><span class="pill">80 / 20</span></div>
+ <div class="chart-layout"><div class="pie" id="idealPie"><div class="pie-center"><strong>100%</strong><span>ideal</span></div></div><div id="idealLegend"></div></div>
+ <div class="note">Majority: eight colors at 10% each (80% total). Minority: five colors at 4% each (20% total).</div>
+</section>
+<section class="card">
+ <div class="section-head"><div><div class="eyebrow">Planning</div><h2>Recommended additions</h2><div class="muted" style="font-size:12px">A dynamic target based on every color, including colors you do not own yet.</div></div></div>
+ <div class="recommend-total"><div class="mini-stat"><strong id="addTotal">0</strong><span>Items to add</span></div><div class="mini-stat"><strong id="projectedTotal">0</strong><span>Projected collection</span></div><div class="mini-stat"><strong id="majorityAdd">0</strong><span>Majority to add</span></div><div class="mini-stat"><strong id="minorityAdd">0</strong><span>Minority to add</span></div></div>
+ <div class="table-wrap"><table><thead><tr><th>Color</th><th class="num">Current</th><th class="num">Add</th><th class="num">Projected</th><th class="num">Target</th></tr></thead><tbody id="recommendRows"></tbody></table></div>
+ <div class="note" id="recommendNote">Add items to calculate a target. Recommendations are mathematical guidance, not an instruction to purchase unnecessary items.</div>
+</section>
+<section class="card full">
+ <div class="section-head"><div><div class="eyebrow">Local image utility</div><h2>Color dropper</h2><div class="muted" style="font-size:12px">Upload a photo, then tap or click the item color to find its closest palette match.</div></div></div>
+ <div class="tools-grid">
+  <div class="upload-box"><input id="imageInput" type="file" accept="image/*"><div class="image-stage" id="imageStage"><canvas id="imageCanvas"></canvas></div><p class="help">Image processing stays in your browser. For best results, sample a clear, evenly lit area.</p></div>
+  <div><div class="muted" style="font-size:12px">Sampled pixel</div><div class="sample-result"><div class="sample-chip" id="sampleChip" style="background:#fff"></div><div><strong id="sampleHex">No color sampled</strong><small id="sampleRgb">Tap the image to sample a pixel.</small></div></div><hr><div class="muted" style="font-size:12px">Closest tracker palette color</div><div class="sample-result"><div class="sample-chip" id="matchChip" style="background:#fff"></div><div><strong id="matchName">—</strong><small id="matchHex">—</small></div></div><div class="dropper-actions"><button class="btn primary" id="useMatch" type="button" disabled>Use this color in item form</button></div></div>
+ </div>
+</section>
+</div>
+<div class="footer">Color Allocation Tracker · All data stays in this browser unless you export it.</div>
+</div>
+<script>
+(() => {
+"use strict";
+const COLORS = [
+ {name:"Orange",hex:"#F28C28",target:.10,group:"majority"},
+ {name:"Yellow",hex:"#F2D34F",target:.10,group:"majority"},
+ {name:"Green",hex:"#438A55",target:.10,group:"majority"},
+ {name:"Blue",hex:"#3478C8",target:.10,group:"majority"},
+ {name:"Purple",hex:"#8756B3",target:.10,group:"majority"},
+ {name:"White",hex:"#F7F7F2",target:.10,group:"majority"},
+ {name:"Silver",hex:"#AEB6BE",target:.10,group:"majority"},
+ {name:"Pink",hex:"#E98EB7",target:.10,group:"majority"},
+ {name:"Red",hex:"#D94A45",target:.04,group:"minority"},
+ {name:"Black",hex:"#252525",target:.04,group:"minority"},
+ {name:"Gold",hex:"#C9A23F",target:.04,group:"minority"},
+ {name:"Gray",hex:"#85898D",target:.04,group:"minority"},
+ {name:"Brown",hex:"#80583E",target:.04,group:"minority"}
+];
+const STORAGE_KEY="color-allocation-tracker-v1";
+let items=[];
+const $=id=>document.getElementById(id);
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const colorByName=name=>COLORS.find(c=>c.name===name);
+function load(){try{const raw=localStorage.getItem(STORAGE_KEY);if(raw){const parsed=JSON.parse(raw);if(Array.isArray(parsed))items=validateItems(parsed)}}catch(e){items=[]}}
+function validateItems(arr){if(!Array.isArray(arr))throw Error("JSON must contain an array of items.");return arr.map((x,i)=>{if(!x||typeof x.name!=="string"||!x.name.trim()||!colorByName(x.color))throw Error("Invalid item at row "+(i+1)+". Each item needs a non-empty name and a valid palette color.");return {id:typeof x.id==="string"&&x.id?x.id:makeId(),name:x.name.trim().slice(0,180),color:x.color}})}
+function makeId(){return (globalThis.crypto&&crypto.randomUUID)?crypto.randomUUID():String(Date.now())+Math.random().toString(16).slice(2)}
+function save(){try{localStorage.setItem(STORAGE_KEY,JSON.stringify(items));$("savedState").textContent="Auto-saved"}catch(e){$("savedState").textContent="Save unavailable"}}
+function countFor(color){return items.filter(x=>x.color===color.name).length}
+function pieGradient(counts,total){if(!total)return "conic-gradient(#e9ece8 0 100%)";let start=0,parts=[];COLORS.forEach((c,i)=>{const v=counts[i]/total*100;if(v>0){parts.push(`${c.hex} ${start}% ${start+v}%`);start+=v}});return "conic-gradient("+parts.join(",")+")"}
+function pct(n,total){return total?((n/total)*100).toFixed(1)+"%":"0.0%"}
+function legendRow(c,n,p){return `<div class="legend-row"><div class="legend-name"><i class="swatch" style="background:${c.hex}"></i><span>${c.name}</span></div><span class="num">${n}</span><span class="pct">${p}</span></div>`}
+function renderItems(){
+ const host=$("itemList");
+ if(!items.length){host.innerHTML='<div class="empty">No items yet. Add your first item above.</div>'}
+ else host.innerHTML=items.map(x=>{const c=colorByName(x.color);return `<div class="item"><div class="item-name">${esc(x.name)}</div><div class="color-tag"><i class="swatch" style="background:${c.hex}"></i>${c.name}</div><button class="btn small danger" data-delete="${esc(x.id)}" aria-label="Delete ${esc(x.name)}">×</button></div>`}).join("");
+ host.querySelectorAll("[data-delete]").forEach(b=>b.addEventListener("click",()=>{items=items.filter(x=>x.id!==b.dataset.delete);update()}));
+ $("clearBtn").disabled=!items.length;
+}
+function getRecommendation(counts,N){
+ if(N===0)return {T:0,adds:COLORS.map(()=>0),projected:COLORS.map(()=>0)};
+ // Minimum feasible total: no existing color count may exceed its ideal quota.
+ const T=Math.max(N,...COLORS.map((c,i)=>Math.ceil((counts[i]/c.target)-1e-12)));
+ const deficits=COLORS.map((c,i)=>Math.max(0,T*c.target-counts[i]));
+ const adds=deficits.map(x=>Math.floor(x+1e-10));
+ let remaining=(T-N)-adds.reduce((a,b)=>a+b,0);
+ // Largest fractional deficits receive the remaining whole items.
+ const order=deficits.map((d,i)=>({i,frac:d-Math.floor(d+1e-10)})).sort((a,b)=>b.frac-a.frac||a.i-b.i);
+ for(let k=0;k<remaining;k++)adds[order[k%order.length].i]++;
+ return {T,adds,projected:counts.map((n,i)=>n+adds[i])};
+}
+function renderActual(counts,N){
+ $("totalItems").textContent=N;$("actualCenter").textContent=N;
+ const majority=COLORS.reduce((s,c,i)=>s+(c.group==="majority"?counts[i]:0),0);
+ $("majorityActual").textContent=pct(majority,N);$("minorityActual").textContent=pct(N-majority,N);
+ $("actualPie").style.background=pieGradient(counts,N);
+ $("actualLegend").innerHTML='<div class="legend-row legend-head"><span>Color</span><span class="num">Items</span><span class="pct">Share</span></div>'+COLORS.map((c,i)=>legendRow(c,counts[i],pct(counts[i],N))).join("");
+}
+function renderIdeal(){
+ const counts=COLORS.map(c=>c.target*100);
+ $("idealPie").style.background=pieGradient(counts,100);
+ const major=COLORS.filter(c=>c.group==="majority"),minor=COLORS.filter(c=>c.group==="minority");
+ const rows=arr=>arr.map(c=>`<div class="legend-row"><div class="legend-name"><i class="swatch" style="background:${c.hex}"></i><span>${c.name}</span></div><span class="num"></span><span class="pct">${(c.target*100).toFixed(0)}%</span></div>`).join("");
+ $("idealLegend").innerHTML=`<div class="group-label"><span>Majority colors</span><span>80%</span></div><div class="legend">${rows(major)}</div><div class="group-label"><span>Minority colors</span><span>20%</span></div><div class="legend">${rows(minor)}</div>`;
+}
+function renderRecommendations(counts,N){
+ const r=getRecommendation(counts,N),totalAdd=r.adds.reduce((a,b)=>a+b,0);
+ const majorAdd=COLORS.reduce((s,c,i)=>s+(c.group==="majority"?r.adds[i]:0),0),minorAdd=totalAdd-majorAdd;
+ $("addTotal").textContent=totalAdd;$("projectedTotal").textContent=r.T;$("majorityAdd").textContent=majorAdd;$("minorityAdd").textContent=minorAdd;
+ $("recommendRows").innerHTML=COLORS.map((c,i)=>({c,i})).filter(x=>x.c.name&& (r.adds[x.i]>0||counts[x.i]>0)).map(({c,i})=>`<tr><td><span class="color-tag"><i class="swatch" style="background:${c.hex}"></i>${c.name}</span></td><td class="num">${counts[i]}</td><td class="num"><strong>${r.adds[i]}</strong></td><td class="num">${r.projected[i]}</td><td class="num">${(c.target*100).toFixed(0)}%</td></tr>`).join("")||'<tr><td colspan="5" class="muted">Add an item to generate recommendations for all 13 colors.</td></tr>';
+ const note=N?`The smallest feasible projected size is ${r.T} items. Add ${totalAdd} item${totalAdd===1?"":"s"} to reach the closest whole-item allocation. The calculation includes all 13 colors and never removes an existing item. This is a mathematical target, not an instruction to purchase unnecessary items.`:"Add an item to calculate the smallest feasible projected collection size. Recommendations are mathematical guidance, not an instruction to purchase unnecessary items.";
+ $("recommendNote").textContent=note;
+}
+function update(){renderItems();const counts=COLORS.map(countFor),N=items.length;renderActual(counts,N);renderRecommendations(counts,N);save()}
+function initSelect(){ $("itemColor").innerHTML=COLORS.map(c=>`<option value="${c.name}">${c.name}</option>`).join("")}
+$("itemForm").addEventListener("submit",e=>{e.preventDefault();const name=$("itemName").value.trim(),color=$("itemColor").value;if(!name){$("itemName").focus();return}if(!colorByName(color))return;items.push({id:makeId(),name,color});$("itemName").value="";update();$("itemName").focus()});
+$("clearBtn").addEventListener("click",()=>{if(items.length&&confirm("Delete every item in your collection? This cannot be undone unless you exported a backup.")){items=[];update()}});
+$("exportBtn").addEventListener("click",()=>{const blob=new Blob([JSON.stringify({app:"Color Allocation Tracker",version:1,exportedAt:new Date().toISOString(),items},null,2)],{type:"application/json"});const url=URL.createObjectURL(blob),a=document.createElement("a");a.href=url;a.download="color-allocation-collection.json";a.click();URL.revokeObjectURL(url)});
+$("importBtn").addEventListener("click",()=>$("importFile").click());
+$("importFile").addEventListener("change",async e=>{const file=e.target.files[0];if(!file)return;try{const data=JSON.parse(await file.text()),arr=Array.isArray(data)?data:data.items;if(!Array.isArray(arr))throw Error("The file does not contain an items array.");const validated=validateItems(arr);if(!confirm(`Replace your current collection with ${validated.length} imported item(s)?`))return;items=validated;update();alert("Import complete. Your charts and recommendations have been updated.")}catch(err){alert("Import failed: "+err.message)}finally{e.target.value=""}});
+let loadedImage=null;
+$("imageInput").addEventListener("change",e=>{const file=e.target.files[0];if(!file)return;if(!file.type.startsWith("image/")){alert("Please choose an image file.");return}const url=URL.createObjectURL(file),img=new Image();img.onload=()=>{loadedImage=img;const canvas=$("imageCanvas"),ctx=canvas.getContext("2d",{willReadFrequently:true});const maxW=1000,scale=Math.min(1,maxW/img.naturalWidth);canvas.width=Math.round(img.naturalWidth*scale);canvas.height=Math.round(img.naturalHeight*scale);ctx.drawImage(img,0,0,canvas.width,canvas.height);$("imageStage").style.display="block";URL.revokeObjectURL(url)};img.onerror=()=>{URL.revokeObjectURL(url);alert("Could not read this image.")};img.src=url});
+function hexToRgb(hex){return [parseInt(hex.slice(1,3),16),parseInt(hex.slice(3,5),16),parseInt(hex.slice(5,7),16)]}
+function rgbToLab(rgb){let [r,g,b]=rgb.map(v=>{v/=255;return v<=.04045?v/12.92:Math.pow((v+.055)/1.055,2.4)});let x=(r*.4124+g*.3576+b*.1805)/.95047,y=(r*.2126+g*.7152+b*.0722),z=(r*.0193+g*.1192+b*.9505)/1.08883;const f=t=>t>.008856?Math.cbrt(t):(7.787*t+16/116);x=f(x);y=f(y);z=f(z);return [116*y-16,500*(x-y),200*(y-z)]}
+function closestColor(rgb){const lab=rgbToLab(rgb);let best=null,dist=Infinity;COLORS.forEach(c=>{const l=rgbToLab(hexToRgb(c.hex)),d=Math.sqrt(l.reduce((s,v,i)=>s+(v-lab[i])**2,0));if(d<dist){dist=d;best=c}});return best}
+let sampledMatch=null;
+$("imageCanvas").addEventListener("click",e=>{const canvas=e.currentTarget,rect=canvas.getBoundingClientRect(),x=Math.max(0,Math.min(canvas.width-1,Math.floor((e.clientX-rect.left)*canvas.width/rect.width))),y=Math.max(0,Math.min(canvas.height-1,Math.floor((e.clientY-rect.top)*canvas.height/rect.height)));try{const d=canvas.getContext("2d",{willReadFrequently:true}).getImageData(x,y,1,1).data,rgb=[d[0],d[1],d[2]],hex="#"+rgb.map(v=>v.toString(16).padStart(2,"0")).join("").toUpperCase(),match=closestColor(rgb);sampledMatch=match;$("sampleChip").style.background=hex;$("sampleHex").textContent=hex;$("sampleRgb").textContent=`RGB ${rgb.join(", ")}`;$("matchChip").style.background=match.hex;$("matchName").textContent=match.name;$("matchHex").textContent=`${match.hex} · closest palette match`;$("useMatch").disabled=false}catch(err){alert("This image could not be sampled. Try another image.")}});
+$("useMatch").addEventListener("click",()=>{if(!sampledMatch)return;$("itemColor").value=sampledMatch.name;$("itemName").focus()});
+load();initSelect();renderIdeal();update();
+})();
+</script>
+</body>
+</html>
